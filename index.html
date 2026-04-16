@@ -623,9 +623,17 @@
         if(data.status === "Presentasi") {
           container.innerHTML = `<iframe src="books/${data.file}" width="100%" height="400px" style="border:none; border-radius:12px;"></iframe>`;
         } else if(data.status === "Selesai") {
-          container.innerText = "Sesi Berakhir";
-          clearInterval(syncInterval);
-        }
+    container.innerHTML = `
+        <div style="text-align:center; padding:20px;">
+            <h3 style="color:#ef4444;">Sesi Telah Berakhir</h3>
+            <p>Terima kasih telah mengikuti kelas ini.</p>
+        </div>`;
+    
+    // MUNCULKAN TOMBOL RESET
+    document.getElementById("resetMuridArea").classList.remove("hidden");
+    
+    clearInterval(syncInterval);
+}
       });
     }
 
@@ -681,9 +689,18 @@ function syncWithGuru() {
             }
         } 
         else if(data.status === "Selesai") {
-            container.innerText = "Sesi Berakhir";
-            clearInterval(syncInterval);
-        }
+    container.innerHTML = `
+        <div style="text-align:center; padding:20px;">
+            <h3 style="color:#ef4444;">Sesi Telah Berakhir</h3>
+            <p>Terima kasih telah mengikuti kelas ini.</p>
+        </div>`;
+    
+    // Munculin tombol masuk ulang
+    document.getElementById("resetMuridArea").classList.remove("hidden");
+    
+    // Stop sync
+    clearInterval(syncInterval);
+}
     });
 }
 
@@ -726,18 +743,17 @@ function showToast(msg) {
     setTimeout(() => { toast.style.display = "none"; }, 2500);
 }
 function resetTampilanMurid() {
-    // 1. Bersihkan status di UI
+    // Sembunyikan tombol reset
     document.getElementById("resetMuridArea").classList.add("hidden");
     
-    // 2. Jika kamu menyimpan kode kelas di variable global atau localStorage, hapus itu
-    currentClassCode = null; 
+    // Hentikan sinkronisasi biar gak nyangkut
+    clearInterval(syncInterval);
     
-    // 3. Tampilkan kembali input kode kelas (asumsi kamu punya fungsi ini)
-    showInputKodeKelas(); 
+    // Balikin ke tampilan input kode
+    showInputKodeKelas();
     
-    showToast("Silahkan masukkan kode kelas baru.");
+    showToast("Silakan masuk ke kelas baru.");
 }
-
 // Fungsi untuk menampilkan Detail Buku (Bottom Sheet)
 function openBookDetails(title, file, emoji, color) {
     // Isi konten sheet
@@ -839,6 +855,17 @@ async function amanBukaBuku(fileName) {
         showToast("❌ Gagal memuat file secara offline.");
     }
 }
+function showInputKodeKelas() {
+    // Tampilkan kembali form input kode
+    document.getElementById("joinArea").classList.remove("hidden");
+    
+    // Sembunyikan area kelas aktif
+    document.getElementById("liveClassArea").classList.add("hidden");
+    
+    // Kosongkan input kode
+    document.getElementById("inputClassCode").value = "";
+}
+
 function initDeveloperMode() {
     const sandbox = document.getElementById("devSandbox");
     
