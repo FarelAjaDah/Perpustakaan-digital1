@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Pustaka Furina v3 - Modern Sync</title>
@@ -174,30 +176,43 @@
 
     /* --- BOOKS GRID --- */
     .books-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 20px;
-      padding-bottom: 120px;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Lebih kecil di mobile */
+  gap: 16px;
+  padding-bottom: 120px;
+}
 
-    .book-card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 20px;
-      border: 1px solid var(--glass-border);
-      text-decoration: none;
-      color: inherit;
-      text-align: center;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      cursor: pointer;
-    }
+    /* Efek Glassmorphism pada Kartu */
+  .book-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 20px;
+  border: 1px solid var(--glass-border);
+  text-decoration: none;
+  color: inherit;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
 
     .book-card:hover {
-    transform: translateY(-10px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--accent);
-    }
-
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
+}
+/* Animasi Loading Shimmer (Opsional) */
+@keyframes shimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+.loading-skeleton {
+  background: linear-gradient(to right, var(--input-bg) 8%, #e2e8f0 18%, var(--input-bg) 33%);
+  background-size: 800px 104px;
+  animation: shimmer 1.2s linear infinite;
+}
     .book-cover {
       width: 64px; height: 64px; margin: 0 auto 16px;
       border-radius: 20px; display: flex; align-items: center; justify-content: center; 
@@ -330,6 +345,11 @@
     @media (min-width: 768px) {
       .books-grid { grid-template-columns: repeat(4, 1fr); }
     }
+    .login-card button {
+  position: relative;
+  z-index: 10; /* Memastikan tombol di atas elemen lain */
+  cursor: pointer;
+}
   </style>
 </head>
 
@@ -337,16 +357,16 @@
 
   <div id="loginPage">
   <div class="login-card animate">
-    <div style="text-align: right; margin-bottom: -20px;">
-    <button onclick="toggleTheme()" style="background:none; border:none; font-size: 22px; cursor:pointer;">🌓</button>
-  </div>
+    <div style="position: absolute; top: 20px; right: 20px; z-index: 20;">
+      <button onclick="toggleTheme()" style="background:none; border:none; font-size: 22px; cursor:pointer;">🌓</button>
+    </div>
 
     <div class="login-header">
       <h1>📖</h1>
-    <h2 style="font-size: 28px; font-weight: 800; letter-spacing: -1px;">Pustaka Furina</h2>
-    <p style="color: var(--text-soft); font-size: 15px; margin-bottom: 32px;">Pintu digital menuju ilmu tanpa batas.</p>
-  </div>
-    
+      <h2 style="font-size: 28px; font-weight: 800; letter-spacing: -1px;">Pustaka Digital</h2>
+      <p style="color: var(--text-soft); font-size: 15px; margin-bottom: 32px;">Akses Buku secara simpel dan mudah</p>
+    </div>
+
     <div class="input-group">
       <label>Nama Pengguna</label>
       <input type="text" id="usernameInput" placeholder="Masukkan nama pengguna" autocomplete="off">
@@ -413,6 +433,7 @@
 
       <div id="kelasSection" class="hidden animate">
         <div class="sync-card">
+
           <div id="guruView" class="hidden">
     <h3 style="margin-bottom: 12px;">Panel Guru</h3>
     
@@ -438,6 +459,19 @@
             <select id="pilihPdfQuiz" style="margin-top:5px;">
                 <option value="quiz_matematika.pdf">Soal Matematika.pdf</option>
                 <option value="quiz_umum.pdf">Soal Umum.pdf</option>
+                <div id="rekapJawaban" style="margin-top: 25px; text-align: left; border-top: 2px dashed var(--glass-border); padding-top: 15px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <label style="font-size: 11px; font-weight: 800; color: var(--accent);">JAWABAN MURID</label>
+        <button onclick="pantauJawaban()" style="font-size: 10px; background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer;">Refresh Jawaban</button>
+    </div>
+    <div id="listJawabanMurid" style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+        <p style="font-size: 12px; color: var(--text-soft);">Belum ada jawaban masuk...</p>
+    </div>
+</div>
+<div id="guruPreviewArea" class="hidden" style="margin-top: 25px; border-top: 2px solid var(--glass-border); padding-top: 20px;">
+    <p style="font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 10px;">LIVE PREVIEW (ANDA SEDANG PRESENTASI)</p>
+    <div id="guruIframeContainer"></div>
+</div>
             </select>
         </div>
     </div>
@@ -542,22 +576,33 @@
     }
 
     function renderBooks(kw) {
-      const list = document.getElementById("bookList");
-      const filtered = books.filter(b => {
-        const matchKeyword = b.title.toLowerCase().includes(kw.toLowerCase());
-        const matchCategory = (currentCategory === "Semua") || (b.category === currentCategory);
-        return matchKeyword && matchCategory;
-      });
+    const list = document.getElementById("bookList");
+    const keyword = kw.toLowerCase();
 
-      document.getElementById("bookCounter").innerText = `${filtered.length} buku tersedia`;
-      list.innerHTML = filtered.map(b => `
-        <div class="book-card animate" onclick="window.open('books/${b.file}', '_blank')">
-          <div class="book-cover" style="background: ${b.color}12; color: ${b.color};">${b.emoji}</div>
-          <div style="font-weight: 700; font-size: 14px;">${b.title}</div>
-          <div style="font-size: 10px; color: var(--text-soft); text-transform: uppercase; margin-top: 4px;">${b.category}</div>
-        </div>
-      `).join('');
+    const filtered = books.filter(b => {
+        return b.title.toLowerCase().includes(keyword) || 
+               b.category.toLowerCase().includes(keyword);
+    });
+
+    document.getElementById("bookCounter").innerText = `${filtered.length} buku tersedia`;
+
+    if (filtered.length === 0) {
+        list.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-soft);">
+                <span style="font-size: 48px;">🔍</span>
+                <p style="margin-top: 10px; font-weight: 600;">Materi tidak ditemukan...</p>
+            </div>`;
+        return;
     }
+
+    list.innerHTML = filtered.map(b => `
+        <div class="book-card animate" onclick="openBookDetails('${b.title}', '${b.file}', '${b.emoji}', '${b.color}')">
+            <div class="book-cover" style="background: ${b.color}12; color: ${b.color};">${b.emoji}</div>
+            <div style="font-weight: 700; font-size: 14px;">${b.title}</div>
+            <div style="font-size: 10px; color: var(--text-soft); text-transform: uppercase; margin-top: 4px;">${b.category}</div>
+        </div>
+    `).join('');
+}
 
     function setCategory(cat) {
       currentCategory = cat;
@@ -603,9 +648,31 @@
       });
     }
 
-    function mulaiPresentasi() {
+      function mulaiPresentasi() {
       updateClassStatus("Presentasi", document.getElementById("pilihBuku").value);
+    const fileYangDipilih = document.getElementById("pilihBuku").value;
+    updateClassStatus("Presentasi", fileYangDipilih);
+    
+    // Tampilkan preview untuk Guru
+    const previewArea = document.getElementById("guruPreviewArea");
+    const iframeContainer = document.getElementById("guruIframeContainer");
+    
+    previewArea.classList.remove("hidden");
+    iframeContainer.innerHTML = `<iframe src="books/${fileYangDipilih}" width="100%" height="300px" style="border:none; border-radius:12px; border: 1px solid var(--glass-border);"></iframe>`;
+    
+    showToast("Presentasi dimulai! Murid sekarang melihat materi.");
+}
+
+// Tambahkan juga pada updateClassStatus tipe Selesai untuk sembunyikan preview
+function updateClassStatus(tipe, file = null) {
+    // ... kode lama kamu ...
+    if (tipe === 'Selesai') {
+        document.getElementById("guruPreviewArea").classList.add("hidden");
+        document.getElementById("guruIframeContainer").innerHTML = "";
     }
+    // ... fetch fetch ...
+}
+    
 
     function joinClass() {
       const input = document.getElementById("inputClassCode").value.toUpperCase();
@@ -663,47 +730,116 @@ function mulaiQuiz() {
 }
 
 // Update fungsi syncWithGuru (POV Murid) agar bisa menampilkan teks atau PDF
+let currentSyncFile = ""; // Variabel bantu untuk mengecek file terakhir
+
 function syncWithGuru() {
     fetch(FIREBASE_URL).then(res => res.json()).then(data => {
-        document.getElementById("currentStatus").innerText = "STATUS: " + data.status;
         const container = document.getElementById("classContent");
+        const statusEl = document.getElementById("currentStatus");
         
-        if(data.status === "Presentasi") {
-            container.innerHTML = `<iframe src="books/${data.file}" width="100%" height="400px" style="border:none; border-radius:12px;"></iframe>`;
-        } 
-        else if(data.status === "Quiz") {
-            // Cek apakah konten kuis berupa PDF atau Teks Manual
-            if(data.file.endsWith('.pdf')) {
-                container.innerHTML = `
-                    <div style="width:100%; text-align:left;">
-                        <p style="font-weight:bold; margin-bottom:10px;">📝 Kerjakan Soal PDF Berikut:</p>
-                        <iframe src="books/${data.file}" width="100%" height="400px" style="border:none; border-radius:12px;"></iframe>
-                    </div>`;
-            } else {
-                container.innerHTML = `
-                    <div style="padding:20px; background:white; border-radius:15px; width:100%; text-align:left; box-shadow:var(--shadow-sm);">
-                        <p style="font-weight:800; color:var(--accent); margin-bottom:10px;">📝 SOAL KUIS:</p>
-                        <p style="font-size:16px; white-space: pre-wrap;">${data.file}</p>
-                        <hr style="margin:15px 0; opacity:0.1;">
-                        <textarea placeholder="Tulis jawabanmu di sini..." style="width:100%; height:100px; border-radius:10px; padding:10px; border:1px solid #ddd;"></textarea>
-                        <button class="btn-main" style="margin-top:10px; background:var(--accent);" onclick="alert('Jawaban terkirim!')">Kirim Jawaban</button>
-                    </div>`;
+        // Update teks status hanya jika berubah
+        if (statusEl.innerText !== "STATUS: " + data.status) {
+            statusEl.innerText = "STATUS: " + data.status;
+        }
+
+        if (data.status === "Presentasi") {
+            // HANYA update iframe jika file-nya BERBEDA dari sebelumnya
+            if (currentSyncFile !== data.file) {
+                container.innerHTML = `<iframe src="books/${data.file}" width="100%" height="400px" style="border:none; border-radius:12px;"></iframe>`;
+                currentSyncFile = data.file; // Simpan file yang sekarang tayang
             }
         } 
-        else if(data.status === "Selesai") {
-    container.innerHTML = `
-        <div style="text-align:center; padding:20px;">
-            <h3 style="color:#ef4444;">Sesi Telah Berakhir</h3>
-            <p>Terima kasih telah mengikuti kelas ini.</p>
-        </div>`;
-    
-    // Munculin tombol masuk ulang
-    document.getElementById("resetMuridArea").classList.remove("hidden");
-    
-    // Stop sync
-    clearInterval(syncInterval);
-}
+        else if (data.status === "Quiz") {
+            if (currentSyncFile !== "QUIZ_" + data.file) { // Tambah prefix agar tidak bentrok dengan pdf materi
+                renderQuizContent(data, container);
+                currentSyncFile = "QUIZ_" + data.file;
+            }
+        }
+        else if (data.status === "Selesai") {
+            if (currentSyncFile !== "SELESAI") {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:20px;">
+                        <h3 style="color:#ef4444;">Sesi Telah Berakhir</h3>
+                        <p>Terima kasih telah mengikuti kelas ini.</p>
+                    </div>`;
+                document.getElementById("resetMuridArea").classList.remove("hidden");
+                currentSyncFile = "SELESAI";
+                clearInterval(syncInterval);
+            }
+        }
     });
+}
+
+// Fungsi pembantu agar kode sync lebih rapi
+function renderQuizContent(data, container) {
+    const studentName = localStorage.getItem("user_name");
+    const classCode = data.code;
+
+    if (data.file.endsWith('.pdf')) {
+        container.innerHTML = `
+            <div style="width:100%; text-align:left;">
+                <p style="font-weight:bold; margin-bottom:10px;">📝 Kerjakan Soal PDF Berikut:</p>
+                <iframe src="books/${data.file}" width="100%" height="400px" style="border:none; border-radius:12px;"></iframe>
+            </div>`;
+    } else {
+        container.innerHTML = `
+            <div style="padding:20px; background:white; border-radius:15px; width:100%; text-align:left; box-shadow:var(--shadow-sm);">
+                <p style="font-weight:800; color:var(--accent); margin-bottom:10px;">📝 SOAL KUIS:</p>
+                <p style="font-size:16px; white-space: pre-wrap;">${data.file}</p>
+                <hr style="margin:15px 0; opacity:0.1;">
+                <textarea id="jawabanMuridText" placeholder="Tulis jawabanmu di sini..." style="width:100%; height:100px; border-radius:10px; padding:10px; border:1px solid #ddd; color:#000;"></textarea>
+                <button class="btn-main" style="margin-top:10px; background:var(--accent);" 
+                    onclick="kirimJawabanKeGuru('${classCode}', '${studentName}')">Kirim Jawaban</button>
+            </div>`;
+    }
+}
+function kirimJawabanKeGuru(code, nama) {
+    const isiJawaban = document.getElementById("jawabanMuridText").value;
+    if(!isiJawaban) return showToast("Isi jawaban dulu!");
+
+    const URL_JAWABAN = `https://perpustakaan-digital-5e62a-default-rtdb.asia-southeast1.firebasedatabase.app/answers/${code}/${nama}.json`;
+
+    fetch(URL_JAWABAN, {
+        method: 'PUT',
+        body: JSON.stringify({
+            nama: nama,
+            jawaban: isiJawaban,
+            waktu: new Date().toLocaleTimeString()
+        })
+    }).then(() => {
+        showToast("Jawaban berhasil terkirim!");
+    });
+}
+async function kirimJawabanKeGuru(code, nama) {
+    const btn = event.target; // Ambil tombol yang diklik
+    const isiJawaban = document.getElementById("jawabanMuridText").value;
+    
+    if(!isiJawaban) return showToast("Isi jawaban dulu!");
+
+    // Feedback Visual: Loading
+    const originalText = btn.innerText;
+    btn.innerText = "Mengirim...";
+    btn.disabled = true;
+
+    const URL_JAWABAN = `https://perpustakaan-digital-5e62a-default-rtdb.asia-southeast1.firebasedatabase.app/answers/${code}/${nama}.json`;
+
+    try {
+        await fetch(URL_JAWABAN, {
+            method: 'PUT',
+            body: JSON.stringify({
+                nama: nama,
+                jawaban: isiJawaban,
+                waktu: new Date().toLocaleTimeString()
+            })
+        });
+        showToast("Jawaban berhasil terkirim! ✅");
+        document.getElementById("jawabanMuridText").value = ""; // Bersihkan field
+    } catch (err) {
+        showToast("Gagal mengirim jawaban. Cek koneksi!");
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
 }
 
     function toggleTheme() {
@@ -765,12 +901,11 @@ function openBookDetails(title, file, emoji, color) {
     
     // Set tombol baca
     document.getElementById("btnReadNow").onclick = () => {
-        closeSheet();
-        // Simpan progress lanjut membaca
-        localStorage.setItem("last_read", JSON.stringify({title, file, emoji, color}));
-        checkLastRead();
-        window.open(`books/${file}`, '_blank');
-    };
+    closeSheet();
+    // Simpan progress lanjut membaca
+    localStorage.setItem("last_read", JSON.stringify({title, file, emoji, color}));
+    window.open(`books/${file}`, '_blank');
+};
 
     // Munculkan sheet
     document.getElementById("sheetOverlay").classList.add("active");
@@ -844,6 +979,12 @@ async function amanBukaBuku(fileName) {
     try {
         // Melakukan fetch ringan untuk cek status file
         const response = await fetch(`books/${fileName}`, { method: 'HEAD' });
+        document.getElementById("btnReadNow").onclick = () => {
+    closeSheet();
+    localStorage.setItem("last_read", JSON.stringify({title, file, emoji, color}));
+    // Memanggil fungsi pengecekan file
+    amanBukaBuku(file); 
+};
         
         if (response.ok) {
             // Jika file ditemukan, jalankan fungsi buka buku yang sudah ada
@@ -895,6 +1036,54 @@ function initDeveloperMode() {
     
     console.log("Sandbox Berhasil Dimuat");
 }
+
+function pantauJawaban() {
+    const codeElement = document.getElementById("activeCode");
+    if(!codeElement) return;
+    
+    const code = codeElement.innerText;
+    if(code === "-----") return;
+
+    const URL_AMBIL_JAWABAN = `https://perpustakaan-digital-5e62a-default-rtdb.asia-southeast1.firebasedatabase.app/answers/${code}.json`;
+
+    fetch(URL_AMBIL_JAWABAN)
+    .then(res => res.json())
+    .then(data => {
+        const container = document.getElementById("listJawabanMurid");
+        if(!data) {
+            container.innerHTML = `<p style="font-size: 12px; color: var(--text-soft);">Belum ada jawaban masuk...</p>`;
+            return;
+        }
+
+        // Mengubah objek Firebase menjadi Array agar bisa di-render
+        const daftarJawaban = Object.keys(data).map(key => data[key]);
+
+        container.innerHTML = daftarJawaban.map(item => `
+            <div style="background: var(--input-bg); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-left: 4px solid var(--accent); animation: fadeInUp 0.3s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <b style="font-size: 13px; color: var(--text-main);">${item.nama}</b>
+                    <span style="font-size: 10px; color: var(--text-soft);">${item.waktu || ''}</span>
+                </div>
+                <p style="font-size: 14px; margin-top: 6px; color: var(--text-main); line-height: 1.4;">${item.jawaban}</p>
+            </div>
+        `).join('');
+    })
+    .catch(err => console.error("Gagal mengambil jawaban:", err));
+}
+
+function setupKelasUI() {
+    const isGuru = localStorage.getItem("user_role") === "Guru";
+    document.getElementById("guruView").classList.toggle("hidden", !isGuru);
+    document.getElementById("muridView").classList.toggle("hidden", isGuru);
+
+    // TAMBAHKAN INI: Jika login sebagai guru, cek jawaban otomatis setiap 3 detik
+    if(isGuru) {
+        // Hapus interval lama jika ada (mencegah penumpukan)
+        if(window.pantuanInterval) clearInterval(window.pantuanInterval);
+        
+        window.pantuanInterval = setInterval(pantauJawaban, 3000);
+    }
+}
 // Panggil fungsi applySavedTheme di window.onload
 window.onload = () => {
   applySavedTheme();
@@ -905,7 +1094,6 @@ window.onload = () => {
       if(confirm("Keluar?")) { localStorage.clear(); location.reload(); }
     }
 
-    window.onload = initApp;
   </script>
   <div id="toast" class="toast"></div>
 
@@ -925,4 +1113,4 @@ window.onload = () => {
     </div>
 </div>
 </body>
-</html>
+<!-- </html -->
